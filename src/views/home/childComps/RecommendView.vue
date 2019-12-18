@@ -1,3 +1,4 @@
+<!-- home子组件 好物推荐  -->
 <template>
   <div class="recommend">
     <div v-for="item in recommends" class="recommend-item">

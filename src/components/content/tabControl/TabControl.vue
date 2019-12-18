@@ -1,6 +1,9 @@
+<!--  业务组件 ？？流行 -->
 <template>
   <div class="tab-control">
     <!--    <slot></slot>&lt;!&ndash;只是文字不一样就不要搞插槽了&ndash;&gt;-->
+
+<!-- :class 动态设置class为下标==变量 点击下标对应的标签 -->
     <div v-for="(item, index) in titles"
          class="tab-control-item"
          :class="{active:index === currentIndex}"
@@ -29,6 +32,7 @@
     methods: {
       itemClick(index) {
         this.currentIndex = index   // data里的变量 = 下标
+        this.$emit('tabClick',index)
       }
     }
   }
@@ -49,14 +53,14 @@
   }
 
   .tab-control-item span {
-    padding: 5px;
+    padding: 5px; /*设置内边距 更加简易增大下边框*/
   }
 
   .active {
-    color: var(--color-high-text);
+    color: var(--color-high-text); /*css3调用设置的变量*/
   }
 
-  .active span {
+  .active span {  /*子标签span设置下边框*/
     border-bottom: 3px solid var(--color-high-text);
   }
 </style>

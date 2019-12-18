@@ -1,3 +1,4 @@
+<!--  home子组件 本周流行  -->
 <template>
   <div class="feature">
     <a href="http://act.mogujie.com/zzlx67">

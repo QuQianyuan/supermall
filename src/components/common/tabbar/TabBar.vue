@@ -1,5 +1,7 @@
 <template>
+<!-- 独立组件 整个底部导航栏 -->
   <div id="tab-bar">
+<!-- 插槽 在另一边插入内容-->
     <slot></slot>
   </div>
 </template>
