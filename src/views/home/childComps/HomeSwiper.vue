@@ -1,11 +1,11 @@
 <!-- home子组件 轮播图  -->
 <template>
-<!-- 独立组件 swiper 整个轮播界面 -->
+  <!-- 独立组件 swiper 整个轮播界面 -->
   <swiper>
-<!-- 独立组件 每个轮播图 for循环每个轮播图 -->
+    <!-- 独立组件 每个轮播图 for循环每个轮播图 -->
     <swiper-item v-for="item in banners">
       <a :href="item.link">
-        <img :src="item.image" alt="">
+        <img :src="item.image" alt="" @load="imageLoad">
       </a>
     </swiper-item>
   </swiper>
@@ -24,9 +24,21 @@
         }
       }
     },
+    data() {
+      return {
+        isLoad: false //在开发中经常用这种属性记录一种状态
+      }
+    },
     components: {
       Swiper,
       SwiperItem
+    },
+    methods: {
+      imageLoad() {
+        if(!this.isLoad)
+        this.$emit('swiperImageLoad')
+        this.isLoad = true
+      }
     }
   }
 </script>

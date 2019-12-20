@@ -16,6 +16,10 @@
         type: Number,
         default: 0
       },
+      pullUpLoad: {
+        type: Boolean,
+        default: false
+      }
       // pullUpLoad: {
       //   type: Boolean,
       //   default: false
@@ -35,12 +39,19 @@
         pullUpLoad: this.pullUpLoad
       })
       //  2.监听滚动的位置
-      this.scroll.on('scroll', (position) => {
-        // console.log(position);
-        this.$emit('scroll', position)
-      })
+      if (this.probeType === 2 || this.probeType === 3) {  //这样写更严谨 代码更高效
+        this.scroll.on('scroll', (position) => {
+          this.$emit('scroll', position)
+        })
+      }
       // console.log(this.scroll);
 
+      // 3.监听scroll滚动到底部
+      if (this.pullUpLoad) { //这个默认只能加载一次
+        this.scroll.on('pullingUp', () => {
+          this.$emit('pullingUp')
+        })
+      }
       // //  3.监听上拉事件
       // this.scroll.on('pullingUp', () => {
       //   this.$emit('pullingUp')
@@ -48,14 +59,16 @@
     },
     methods: {
       scrollTo(x, y, time = 300) {  //方法都是放在组件里，方便引用
-       this.Scroll && this.scroll.scrollTo && this.scroll.scrollTo(x, y, time)
+        this.scroll && this.scroll.scrollTo(x, y, time)
       },
       finishPullUp() {
-        this.scroll.finishPullUp()
+        this.scroll && this.scroll.finishPullUp()
       },
       refresh() {
-        console.log('1111');
         this.scroll && this.scroll.refresh()
+      },
+      getScrollY() {
+        return this.scroll.y ? this.scroll.y : 0
       }
     }
   }

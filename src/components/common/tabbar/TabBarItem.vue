@@ -39,7 +39,6 @@
         if (this.$route.path !== this.path) {
           // 把路由替换成 现在点击的路径
           this.$router.replace(this.path)
-          console.log(1);
         }
       }
     },
