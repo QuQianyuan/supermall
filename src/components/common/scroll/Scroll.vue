@@ -16,10 +16,10 @@
         type: Number,
         default: 0
       },
-      pullUpLoad: {
-        type: Boolean,
-        default: false
-      }
+      // pullUpLoad: {
+      //   type: Boolean,
+      //   default: false
+      // }
     },
     data() {
       return {
@@ -39,17 +39,23 @@
         // console.log(position);
         this.$emit('scroll', position)
       })
-      //  3.监听上拉事件
-      this.scroll.on('pullingUp', () => {
-        this.$emit('pullingUp')
-      })
+      // console.log(this.scroll);
+
+      // //  3.监听上拉事件
+      // this.scroll.on('pullingUp', () => {
+      //   this.$emit('pullingUp')
+      // })
     },
     methods: {
       scrollTo(x, y, time = 300) {  //方法都是放在组件里，方便引用
-        this.scroll.scrollTo(x, y, time)
+       this.Scroll && this.scroll.scrollTo && this.scroll.scrollTo(x, y, time)
       },
       finishPullUp() {
         this.scroll.finishPullUp()
+      },
+      refresh() {
+        console.log('1111');
+        this.scroll && this.scroll.refresh()
       }
     }
   }
