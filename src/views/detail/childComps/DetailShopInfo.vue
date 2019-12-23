@@ -139,5 +139,8 @@
     background-color: #f13e3a;
   }
 
-  
+  .shop-bottom {
+    margin-top: 10px;
+    text-align: center;
+  }
 </style>

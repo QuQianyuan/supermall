@@ -60,7 +60,7 @@
     flex: 1;  /*父标签设置弹性布局，子标签设置每份占多少*/
     text-align: center;
     height: 49px;
-    background-color: #F6F6F6;
+    /*background-color: #F6F6F6;*/
     font-size: 14px;
   }
   .tab-bar-item img {

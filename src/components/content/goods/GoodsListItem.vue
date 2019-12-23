@@ -1,6 +1,6 @@
 <template>
   <div class="good-item" @click="itemClick">
-    <img :src="goodsItem.show.img" alt="" @load="imageLoad">
+    <img :src="showImage" alt="" @load="imageLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -13,17 +13,26 @@
   export default {
     name: "GoodsListItem",
     props: {
-        goodsItem: {
-          type: Object,
-          default() {
-            return {}
-          }
+      goodsItem: {
+        type: Object,
+        default() {
+          return {}
+        }
+      }
+    },
+    computed: {
+      showImage() {
+        return this.goodsItem.image || this.goodsItem.show.img
       }
     },
     methods: {
       imageLoad() {
         this.$bus.$emit('itemImageLoad')
-        // console.log(this.$bus);
+        // if (this.$route.path.indexOf('/home')) {
+        //   this.$bus.$emit('itemImageLoad')
+        // } else if (this.$route.path.indexOf('/detail')) {
+        //   this.$bus.$emit('dtailItemImageLoad')
+        // }
       },
       itemClick() {
         this.$router.push('/detail/' + this.goodsItem.iid)
@@ -58,8 +67,8 @@
 
   .goods-info p {
     overflow: hidden;
-    text-overflow: ellipsis;  /*超出的部分显示...*/
-    white-space: nowrap;/*??????*/
+    text-overflow: ellipsis; /*超出的部分显示...*/
+    white-space: nowrap; /*??????*/
     margin-bottom: 3px;
   }
 

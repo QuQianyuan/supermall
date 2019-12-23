@@ -50,7 +50,7 @@
     getHomeMultidata,
     getHomeGoods
   } from 'network/home' // home网络组件方法
-  import {debounce} from "common/utils";
+  import {itmeListenerMiXin} from "common/mixin";
 
   export default {
     name: "Home",
@@ -63,8 +63,8 @@
       GoodsList,
       Scroll,
       BackTop,
-
     },
+    mixins: [itmeListenerMiXin],
     data() {
       return {
         banners: [],
@@ -78,7 +78,7 @@
         isShowBackTop: false,  // 判断是否返回顶部
         tabOffsetTop: 0,  // 距离屏幕顶部的高度
         isTabFixed: false,  // 是否显示上面那个偷天换日的流行
-        saveY: 0   //记录保存？
+        saveY: 0,   //记录保存？
       }
     },
     computed: {
@@ -87,12 +87,14 @@
       }
     },
     activated() {
-      this.$refs.scroll.scrollTo(0, this.saveY, 0)
+        this.$refs.scroll.scrollTo(0, this.saveY, 0)
       this.$refs.scroll.refresh() //每此调用后刷新一次？
     },
     deactivated() {
+      // 1.保存y值
       this.saveY = this.$refs.scroll.getScrollY()
-      console.log(this.saveY);
+      // 2.取消全局事件的监听
+      // this.$bus.$off('itemImgLoad', this.itemImgListener)
     },
     created() {
       // 1.请求多个数据
@@ -101,16 +103,17 @@
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
-
     },
     mounted() {
-      // 1.图片记载完成的事件监听
+      /*// 1.图片记载完成的事件监听
       const refresh = debounce(this.$refs.scroll.refresh) //第一个参数是 fuc 传入的函数
-      this.$bus.$on('itemImageLoad', () => {
+      // 2. 对监听的事件进行保存
+      this.itemImgListener = () => {
         refresh()
-      })
+      }
+      this.$bus.$on('itemImageLoad', this.itemImgListener)
       // 2.获取tabControl的offsetTop
-      // 所有的组件都有一个属性 $el: 用于获取组件当中的元素的
+      // 所有的组件都有一个属性 $el: 用于获取组件当中的元素的*/
       this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
     },
     methods: {
