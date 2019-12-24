@@ -44,13 +44,9 @@
   import TabControl from 'components/content/tabControl/TabControl' //业务组件 控制？
   import GoodsList from 'components/content/goods/GoodsList'  //业务组件 商品列表
   import Scroll from 'components/common/scroll/Scroll'  //独立封装组件 BScroll滚动
-  import BackTop from 'components/content/backTop/BackTop'  //业务组件 返回顶部
 
-  import {
-    getHomeMultidata,
-    getHomeGoods
-  } from 'network/home' // home网络组件方法
-  import {itmeListenerMiXin} from "common/mixin";
+  import {getHomeMultidata, getHomeGoods} from 'network/home' // home网络组件方法
+  import {itmeListenerMiXin, backTopMixin} from "common/mixin";
 
   export default {
     name: "Home",
@@ -62,9 +58,8 @@
       TabControl,
       GoodsList,
       Scroll,
-      BackTop,
     },
-    mixins: [itmeListenerMiXin],
+    mixins: [itmeListenerMiXin, backTopMixin],
     data() {
       return {
         banners: [],
@@ -75,7 +70,6 @@
           'sell': {page: 0, list: []}
         },
         currentType: 'pop', // 获取到是哪个流行类型
-        isShowBackTop: false,  // 判断是否返回顶部
         tabOffsetTop: 0,  // 距离屏幕顶部的高度
         isTabFixed: false,  // 是否显示上面那个偷天换日的流行
         saveY: 0,   //记录保存？
@@ -132,11 +126,6 @@
         }
         this.$refs.tabControl1.currentIndex = index //取巧 把两个流行组件同步
         this.$refs.tabControl2.currentIndex = index //取巧 把两个流行组件同步
-      },
-      backClick() { //返回顶部
-        // this.$refs.scroll.scroll.scrollTo(0, 0, 500)  //先要拿到scroll这个组件再去拿里面某一个属性
-        // 拿到这个scroll组件用这个方法 返回到0，0 500ms
-        this.$refs.scroll.scrollTo(0, 0, 500)  //虽然只少了一个单词 但是体现了封装的方法
       },
       contentScroll(position) { //显示返回顶部按钮 默认隐藏
         // 1.判断BackTop是否显示

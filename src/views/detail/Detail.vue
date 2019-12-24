@@ -1,15 +1,17 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav"/>
-    <scroll class="content" ref="scroll">
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav"/>
+    <scroll class="content" ref="scroll" :probe-type="3" @scroll="contentScroll">
       <detail-swiper :top-images="topImages"/>
       <detail-base-info :goods="goods"/>
       <detail-shop-info :shop="shop"/>
       <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"/>
-      <detail-param-info :param-info="paramInfo"/>
-      <detail-comment-info :comment-info="commentInfo"/>
-      <goods-list :goods="recommends"/>
+      <detail-param-info ref="params" :param-info="paramInfo"/>
+      <detail-comment-info ref="comment" :comment-info="commentInfo"/>
+      <goods-list ref="recommend" :goods="recommends"/>
     </scroll>
+    <detail-bottom-bar/>
+    <back-top @click.native="backClick" v-show="isShowBackTop"/>
   </div>
 </template>
 
@@ -21,34 +23,26 @@
   import DetailGoodsInfo from './childComps/DetailGoodsInfo'
   import DetailParamInfo from './childComps/DetailParamInfo'
   import DetailCommentInfo from './childComps/DetailCommentInfo'
+  import DetailBottomBar from './childComps/DetailBottomBar'
 
   import Scroll from 'components/common/scroll/Scroll'
   import GoodsList from 'components/content/goods/GoodsList'
 
   import {getDetail, getRecommend, Goods, Shop, GoodsParam} from "network/detail";
-  import {itmeListenerMiXin} from "common/mixin";
+  import {itmeListenerMiXin, backTopMixin} from "common/mixin";
+  import {debounce} from "../../common/utils";
 
   export default {
     name: "Detail",
     components: {
-      DetailNavBar,
-      DetailSwiper,
-      DetailBaseInfo,
-      DetailShopInfo,
-      DetailGoodsInfo,
-      DetailParamInfo,
-      DetailCommentInfo,
-      GoodsParam,
-      getRecommend,
-      Scroll,
-      GoodsList,
-      getDetail,
-      Goods,
-      Shop,
+      DetailNavBar, DetailSwiper, DetailBaseInfo, DetailShopInfo, DetailGoodsInfo,
+      DetailParamInfo, DetailCommentInfo, DetailBottomBar,
+
+      GoodsList, Scroll,
+
+      GoodsParam, getRecommend, getDetail, Goods, Shop,
     },
-    mixins: [
-      itmeListenerMiXin
-    ],
+    mixins: [itmeListenerMiXin,backTopMixin],
     data() {
       return {
         iid: null,
@@ -56,15 +50,17 @@
         goods: {},
         shop: {},
         detailInfo: {},
-        paramInfo:{},
+        paramInfo: {},
         commentInfo: {},
         recommends: [],
+        themeTopY: [],
+        getThemeTopY: null,
+        currentIndex: 0,
       }
     },
     created() {
       // 1.保存传入的iid
       this.iid = this.$route.params.iid
-
       // 2.根据iid请求详情
       getDetail(this.iid).then(res => {
         // console.log(res);
@@ -80,21 +76,89 @@
         // 5.获取参数的信息
         this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
         // 6.取出评论的信息
-        if(data.rate.cRate !== 0) {
+        if (data.rate.cRate !== 0) {
           this.commentInfo = data.rate.list[0]
         }
-      })
+        /*
+        // 第一次获取 值不对
+        // 原因：this.$refs.params.$el压根就没有渲染
+        this.themeTopY = []
+        this.themeTopY.push(0)
+        this.themeTopY.push(this.$refs.params.$el.offsetTop)
+        this.themeTopY.push(this.$refs.comment.$el.offsetTop)
+        this.themeTopY.push(this.$refs.recommend.$el.offsetTop)
+        console.log(this.themeTopY);*/
 
+        /*//等到渲染完 会回调一次函数 有值
+        this.$nextTick(() => {
+          //     第二次获取，值不对  原因：图片没有计算在内
+          // 根据最新的数据，对应的DOM是已经被渲染了
+          // 但图片依然没有加载完(目前获取到的offsetTop不包含其中的图片)
+          // 一般情况下offsetTop值不对的时候，都是因为图片的问题
+            this.themeTopY = []
+            this.themeTopY.push(0)
+            this.themeTopY.push(this.$refs.params.$el.offsetTop)
+            this.themeTopY.push(this.$refs.comment.$el.offsetTop)
+            this.themeTopY.push(this.$refs.recommend.$el.offsetTop)
+            console.log(this.themeTopY);
+        })*/
+      })
       // 3.请求推荐数据
       getRecommend().then(res => {
-        // console.log(res);
         this.recommends = res.data.list
       })
+      // 4.getThemeTopY赋值(对给this.getThemeTopY赋值的操作进行防抖)
+      this.getThemeTopY = debounce(() => {
+        this.themeTopY = []
+        this.themeTopY.push(0)
+        this.themeTopY.push(this.$refs.params.$el.offsetTop)
+        this.themeTopY.push(this.$refs.comment.$el.offsetTop)
+        this.themeTopY.push(this.$refs.recommend.$el.offsetTop)
+        this.themeTopY.push(Number.MAX_VALUE)
+        console.log(this.themeTopY);
+      }, 100)
     },
     methods: {
       imageLoad() {
-        this.$refs.scroll.refresh()
-      }
+        this.refresh()
+        this.getThemeTopY()
+      },
+      titleClick(index) {
+        this.$refs.scroll.scrollTo(0, -this.themeTopY[index], 100)
+      },
+      contentScroll(position) {
+        // 1.获取y值
+        const positionY = -position.y
+        // 2.positionY和主题中值进行对比
+        // [0, 5494, 6303, 6534]
+        // positionY 在 0 和 5494 之间，index=0
+        // positionY 在 5494 和 6303 之间，index=1
+        // positionY 在 6303 和 6534 之间，index=2
+        // positionY 超过6534值，index=3   在6534和非常大的值之间 index=3
+        let length = this.themeTopY.length
+        for (let i = 0; i < length; i++) { // str i + 1
+          /*if (positionY > this.themeTopY[i] && positionY < this.themeTopY[i + 1]) {
+            console.log(i);  //这样if的话 3找不到 undefined
+          }*/
+
+          /*if (this.currentIndex !== i && (i < length - 1
+             // 如果现在已经等于i了 就不要判断了
+              && positionY >= this.themeTopY[i] && positionY < this.themeTopY[i + 1])
+              || (i === length - 1 && positionY > this.themeTopY[i])) {
+            this.currentIndex = i
+            // console.log(this.currentIndex);
+            this.$refs.nav.currentIndex = this.currentIndex
+          }*/
+          // 判断条件少很多的话 性能会提高
+          if(this.currentIndex !== i && (positionY > this.themeTopY[i]
+              && positionY < this.themeTopY[i+1])) {
+            this.currentIndex = i
+            this.$refs.nav.currentIndex = this.currentIndex
+          }
+        }
+        // 3.是否显示回到顶部
+        this.isShowBackTop = (-position.y) > 1000
+      },
     },
   }
 </script>
@@ -114,6 +178,6 @@
   }
 
   .content {
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 58px);
   }
 </style>

@@ -52,10 +52,6 @@
           this.$emit('pullingUp')
         })
       }
-      // //  3.监听上拉事件
-      // this.scroll.on('pullingUp', () => {
-      //   this.$emit('pullingUp')
-      // })
     },
     methods: {
       scrollTo(x, y, time = 300) {  //方法都是放在组件里，方便引用
