@@ -7,7 +7,7 @@
     <div class="check-price">
       合计：{{totalPrice}}
     </div>
-    <div class="calculate">
+    <div class="calculate" @click="calcClick">
       去结算：{{checkLength}}
     </div>
   </div>
@@ -55,6 +55,11 @@
           this.cartList.forEach(item => item.checked = true)
         // 这里不能简化？ 因为foreach影响着上面的计算属性 乱套？
         // this.cartList.forEach(item => item.checked = !this.isSelectAll)
+      },
+      calcClick() {
+        if(!this.isSelectAll) {
+          this.$toast.show('请选择购买的商品', 2000)
+        }
       }
     }
   }

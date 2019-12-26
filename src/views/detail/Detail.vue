@@ -12,6 +12,7 @@
     </scroll>
     <detail-bottom-bar @addToCart="addToCart"/>
     <back-top @click.native="backClick" v-show="isShowBackTop"/>
+    <toast/>
   </div>
 </template>
 
@@ -27,10 +28,13 @@
 
   import Scroll from 'components/common/scroll/Scroll'
   import GoodsList from 'components/content/goods/GoodsList'
+  import Toast from 'components/common/toast/Toast'
 
   import {getDetail, getRecommend, Goods, Shop, GoodsParam} from "network/detail";
   import {itmeListenerMiXin, backTopMixin} from "common/mixin";
   import {debounce} from "../../common/utils";
+
+  import {mapActions} from 'vuex'
 
   export default {
     name: "Detail",
@@ -38,11 +42,11 @@
       DetailNavBar, DetailSwiper, DetailBaseInfo, DetailShopInfo, DetailGoodsInfo,
       DetailParamInfo, DetailCommentInfo, DetailBottomBar,
 
-      GoodsList, Scroll,
+      GoodsList, Scroll, Toast,
 
       GoodsParam, getRecommend, getDetail, Goods, Shop,
     },
-    mixins: [itmeListenerMiXin,backTopMixin],
+    mixins: [itmeListenerMiXin, backTopMixin],
     data() {
       return {
         iid: null,
@@ -56,6 +60,8 @@
         themeTopY: [],
         getThemeTopY: null,
         currentIndex: 0,
+        message: '',
+        show: false,
       }
     },
     created() {
@@ -119,6 +125,7 @@
       }, 100)
     },
     methods: {
+      ...mapActions(['addCart']),
       imageLoad() {
         this.refresh()
         this.getThemeTopY()
@@ -150,8 +157,8 @@
             this.$refs.nav.currentIndex = this.currentIndex
           }*/
           // 判断条件少很多的话 性能会提高
-          if(this.currentIndex !== i && (positionY > this.themeTopY[i]
-              && positionY < this.themeTopY[i+1])) {
+          if (this.currentIndex !== i && (positionY > this.themeTopY[i]
+              && positionY < this.themeTopY[i + 1])) {
             this.currentIndex = i
             this.$refs.nav.currentIndex = this.currentIndex
           }
@@ -168,10 +175,22 @@
         product.price = this.goods.realPrice
         product.iid = this.iid
 
-        // 2.将商品加入到购物车里
+        // 2.将商品加入到购物车里 (1.promise 2.mapActions)
         // this.$store.cartList.push(product)  //不要这样做 绕过了vuex的监听 非法
         // this.$store.commit('addCart', product) // mutations
-        this.$store.dispatch('addCart', product)
+        // this.$store.dispatch('addCart', product).then(res => {
+        //   console.log(res);
+        // })
+        this.addCart(product).then(res => { // 本质上会调用actions里的函数 和上面一样
+          // this.show = true
+          // this.message = res
+          // setTimeout(() => {
+          //   this.show = false
+          //   this.message = ''
+          // }, 1500)
+
+          this.$toast.show('成功加入购物车')
+        })
       }
     },
   }
