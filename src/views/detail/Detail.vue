@@ -10,7 +10,7 @@
       <detail-comment-info ref="comment" :comment-info="commentInfo"/>
       <goods-list ref="recommend" :goods="recommends"/>
     </scroll>
-    <detail-bottom-bar/>
+    <detail-bottom-bar @addToCart="addToCart"/>
     <back-top @click.native="backClick" v-show="isShowBackTop"/>
   </div>
 </template>
@@ -63,7 +63,7 @@
       this.iid = this.$route.params.iid
       // 2.根据iid请求详情
       getDetail(this.iid).then(res => {
-        // console.log(res);
+        console.log(res);
         const data = res.result
         // 1.获取顶部的轮播数据
         this.topImages = data.itemInfo.topImages
@@ -115,7 +115,7 @@
         this.themeTopY.push(this.$refs.comment.$el.offsetTop)
         this.themeTopY.push(this.$refs.recommend.$el.offsetTop)
         this.themeTopY.push(Number.MAX_VALUE)
-        console.log(this.themeTopY);
+        // console.log(this.themeTopY);
       }, 100)
     },
     methods: {
@@ -159,6 +159,20 @@
         // 3.是否显示回到顶部
         this.isShowBackTop = (-position.y) > 1000
       },
+      addToCart() {
+        // 1.获取购物车需要展示的信息
+        const product = {}
+        product.image = this.topImages[0]
+        product.title = this.goods.title
+        product.desc = this.goods.desc
+        product.price = this.goods.realPrice
+        product.iid = this.iid
+
+        // 2.将商品加入到购物车里
+        // this.$store.cartList.push(product)  //不要这样做 绕过了vuex的监听 非法
+        // this.$store.commit('addCart', product) // mutations
+        this.$store.dispatch('addCart', product)
+      }
     },
   }
 </script>
